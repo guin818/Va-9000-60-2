@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocabulary Test 60</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; 
+            background-color: #f4f6f9; 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+        .quiz-container { 
+            background-color: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            padding: 25px 20px; 
+            width: 100%; 
+            max-width: 480px; 
+            text-align: center; 
+            box-sizing: border-box; 
+        }
+        .progress { 
+            font-size: 15px; 
+            font-weight: bold; 
+            color: #888; 
+            margin-bottom: 20px; 
+            cursor: default;
+        }
+        .audio-buttons-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .audio-btn { 
+            background-color: #4A90E2; 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: bold; 
+            width: 100%; 
+            transition: background 0.2s;
+        }
+        .audio-btn:hover { background-color: #357abd; }
+
+        .answer-box { 
+            margin: 20px 0; 
+            min-height: 50px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px;
+        }
+        .answer-text { 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: #e74c3c; 
+            display: none; 
+            white-space: pre-line; 
+        }
+        .btn { 
+            border: none; 
+            font-weight: bold; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: background 0.2s;
+        }
+        .btn-show { 
+            background-color: #2ECC71; 
+            color: white; 
+            width: 100%; 
+            margin-bottom: 15px; 
+            min-height: 52px; 
+            font-size: 17px; 
+        }
+        .btn-show:hover { background-color: #27ae60; }
+        
+        .score-buttons { 
+            display: none; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 6px; 
+            margin-bottom: 15px; 
+        }
+        .btn-small { 
+            font-size: 11px; 
+            padding: 8px 2px; 
+            min-height: 36px; 
+            color: white; 
+        }
+        .nav-buttons { 
+            display: flex; 
+            justify-content: space-between; 
+            gap: 12px; 
+        }
+        .btn-nav { 
+            background-color: #34495E; 
+            color: white; 
+            flex: 1; 
+            min-height: 52px; 
+            font-size: 17px; 
+        }
+        .btn-nav:hover { background-color: #2c3e50; }
+        .btn-nav:disabled { background-color: #d2d7d9; color: #95a5a6; cursor: not-allowed; }
+        .result-screen { display: none; }
+        .result-title { font-size: 26px; color: #2c3e50; margin-bottom: 20px; font-weight: bold; }
+        .score-text { font-size: 32px; color: #2c3e50; font-weight: bold; margin-bottom: 10px; background-color: #eef2f7; padding: 15px; border-radius: 12px; }
+        .wrong-detail { font-size: 16px; color: #7f8c8d; margin-bottom: 30px; }
+        .btn-restart { background-color: #9b59b6; color: white; width: 100%; min-height: 52px; font-size: 17px; }
+        .btn-restart:hover { background-color: #8e44ad; }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-area">
+        <div class="progress" id="progress">0 / 60</div>
+        
+        <div>
+            <div class="audio-buttons-group">
+                <button class="audio-btn" onclick="speakDefinition()">🔊 데피니션 듣기</button>
+            </div>
+        </div>
+        
+        <div class="answer-box">
+            <div class="answer-text" id="answer">정답 단어 : 뜻</div>
+        </div>
+        
+        <button class="btn btn-show" id="showAnswerBtn" onclick="showAnswer()">정답 보기</button>
+        
+        <div class="score-buttons" id="scoreButtons">
+            <button class="btn btn-small" style="background-color: #2c3e50;" onclick="recordScore('both_ok')">둘 다 맞음</button>
+            <button class="btn btn-small" style="background-color: #2980b9;" onclick="recordScore('eng_ok')">영만 맞음</button>
+            <button class="btn btn-small" style="background-color: #27ae60;" onclick="recordScore('kor_ok')">한만 맞음</button>
+            <button class="btn btn-small" style="background-color: #7f8c8d;" onclick="recordScore('both_no')">둘 다 틀림</button>
+            <button class="btn btn-small" style="background-color: #d35400;" onclick="recordScore('kor_no')">한만 틀림</button>
+            <button class="btn btn-small" style="background-color: #c0392b;" onclick="recordScore('eng_no')">영만 틀림</button>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="btn btn-nav" id="prevBtn" onclick="prevQuestion()">이전</button>
+            <button class="btn btn-nav" id="nextBtn" onclick="nextQuestion()">다음</button>
+        </div>
+    </div>
+
+    <div id="result-area" class="result-screen">
+        <div class="result-title">💯 60단어 테스트 종료</div>
+        <div class="score-text" id="finalScore">총 틀린 개수: 0개</div>
+        <div class="wrong-detail" id="wrongDetail">상세 결과 준비 중</div>
+        <button class="btn btn-restart" onclick="restartQuiz()">다시 처음부터 하기</button>
+    </div>
+</div>
+
+<script>
+    const originalWords = [
+        // Question 1 ~ 30
+        { word: "dual", mean: "이중의, 둘의", desc: "of or having two parts; double" },
+        { word: "otherwise", mean: "그렇지 않으면, 다른 방법으로", desc: "in a different or other way" },
+        { word: "disgust", mean: "역겨움, 혐오감을 느끼게 하다", desc: "to cause a strong feeling against something; to cause someone to feel sick" },
+        { word: "recent", mean: "최근의", desc: "happening in the very near past" },
+        { word: "expert", mean: "전문가", desc: "someone who knows a great deal about a particular thing" },
+        { word: "intelligent", mean: "총명한, 지적인", desc: "showing a strong, excellent mind or character" },
+        { word: "express", mean: "표현하다", desc: "to make thoughts or feelings known by saying or writing" },
+        { word: "continuous", mean: "연속적인, 끊임없는", desc: "going on without stopping; not ending" },
+        { word: "upward", mean: "위쪽으로", desc: "toward or to a higher position or place" },
+        { word: "option", mean: "선택권, 옵션", desc: "the right, power, or freedom to choose" },
+        { word: "postage", mean: "우편 요금", desc: "the amount of money charged for sending a letter or package by mail" },
+        { word: "eyesight", mean: "시력", desc: "the ability to see; vision" },
+        { word: "injure", mean: "부상을 입히다, 해치다", desc: "to harm or damage" },
+        { word: "intelligent", mean: "총명한, 지적인", desc: "having a great ability to learn, think, and understand" },
+        { word: "summit", mean: "정상, 정점", desc: "the highest part" },
+        { word: "annual", mean: "매년의, 연례의", desc: "happening once every year" },
+        { word: "concentrate", mean: "집중하다", desc: "to give your attention or thought to one thing only" },
+        { word: "extremely", mean: "극도로, 대단히", desc: "not too much; fair" },
+        { word: "rank", mean: "계급, 지위, 순위", desc: "a position as compared to other positions" },
+        { word: "favor", mean: "호의, 부탁", desc: "something kind you do for someone else" },
+        { word: "instruction", mean: "가르침, 설명, 지시", desc: "the act of teaching or giving information or directions" },
+        { word: "offend", mean: "기분 상하게 하다, 불쾌감을 주다", desc: "to cause to be angry or upset" },
+        { word: "eject", mean: "내쫓다, 튀어나오게 하다", desc: "to move something out with force" },
+        { word: "successor", mean: "후임자, 계승자", desc: "a person or thing that comes after or follows another" },
+        { word: "extremely", mean: "극도로, 몹시", desc: "very; to an extreme degree" },
+        { word: "razor", mean: "면도칼", desc: "a tool with a very sharp blade that is used for cutting hair close to the skin" },
+        { word: "receipt", mean: "영수증", desc: "a piece of paper showing that money or things were received" },
+        { word: "nod", mean: "고개를 끄덕이다", desc: "to move the head up and down in order to greet or agree with someone" },
+        { word: "prevent", mean: "막다, 예방하다", desc: "to keep or stop from happening" },
+        { word: "suction", mean: "흡입", desc: "the force that pulls or draws an object or liquid into a vacuum" },
+
+        // Question 31 ~ 60
+        { word: "bud", mean: "싹, 꽃봉오리", desc: "a swelling on a plant that can grow into new parts, such as leaves or a flower" },
+        { word: "explain", mean: "설명하다", desc: "to give information so that another person can understand something" },
+        { word: "settlement", mean: "합의, 정착", desc: "an agreement" },
+        { word: "cautious", mean: "조심스러운, 신중한", desc: "taking care to avoid danger or trouble; careful" },
+        { word: "palm", mean: "손바닥", desc: "the inner surface of the hand" },
+        { word: "elect", mean: "선출하다", desc: "to choose by means of voting" },
+        { word: "bankrupt", mean: "파산한", desc: "not able to pay money owed and free by law from having to pay" },
+        { word: "accept", mean: "받아들이다", desc: "to take when given; receive willingly" },
+        { word: "confirm", mean: "확인하다, 사실임을 보여주다", desc: "to make certain or definite; approve" },
+        { word: "assistant", mean: "조수, 보조", desc: "a person who gives help, aid, or assistance" },
+        { word: "certainly", mean: "틀림없이, 확실히", desc: "without doubt or question" },
+        { word: "among", mean: "~의 사이에", desc: "together with or in the middle of" },
+        { word: "entrance", mean: "입구", desc: "a place through which you enter" },
+        { word: "weed", mean: "잡초", desc: "any plant that grows wild in places where people do not want it to grow" },
+        { word: "disaster", mean: "재난, 참사", desc: "a sudden event that causes a lot of damage" },
+        { word: "prickle", mean: "가시", desc: "a small, sharp, pointed growth or extension, such as a plant thorn" },
+        { word: "engage", mean: "고용하다, 관여하다", desc: "to get or use the service of someone; hire" },
+        { word: "widen", mean: "넓히다", desc: "to make or become wide or wider" },
+        { word: "variation", mean: "변형, 변화", desc: "a slightly different form or version of something, such as an artistic work" },
+        { word: "sorrow", mean: "슬픔", desc: "the feeling of being sad" },
+        { word: "valley", mean: "계곡, 골짜기", desc: "a long area of low land between mountains or hills" },
+        { word: "ache", mean: "아프다", desc: "to have a dull pain that lasts a long time" },
+        { word: "penalty", mean: "벌칙, 처벌", desc: "a punishment given for breaking a law, rule, or agreement" },
+        { word: "error", mean: "실수, 오류", desc: "a mistake in thought or action; something that is wrong" },
+        { word: "convenience", mean: "편의, 편리", desc: "the quality of being useful or handy for someone's purpose or need" },
+        { word: "curriculum", mean: "교육과정", desc: "the courses offered at a school or in a particular area of study" },
+        { word: "lump", mean: "덩어리", desc: "a small mass or pile with no special shape; hunk" },
+        { word: "imperfect", mean: "불완전한", desc: "not perfect or complete; having mistakes or faults" },
+        { word: "hostage", mean: "인질", desc: "someone held prisoner by a person or group trying to force another person or group to meet certain demands" },
+        { word: "gasp", mean: "숨이 턱 막히다, 헐떡이다", desc: "to breathe in gasps; struggle for breath; pant" }
+    ];
+
+    let currentWords = [];
+    let currentIndex = 0;
+    let userAnswers = [];
+    let pressTimer = null;
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initQuiz() {
+        currentWords = shuffle([...originalWords]);
+        currentIndex = 0;
+        userAnswers = new Array(currentWords.length).fill(null);
+    }
+
+    function updateQuiz() {
+        const current = currentWords[currentIndex];
+        document.getElementById('progress').innerText = (currentIndex + 1) + " / " + currentWords.length;
+        document.getElementById('answer').innerText = "정답: " + current.word + "\n뜻: " + current.mean;
+        
+        if (userAnswers[currentIndex] !== null) {
+            document.getElementById('answer').style.display = 'block';
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('scoreButtons').style.display = 'grid';
+        } else {
+            document.getElementById('answer').style.display = 'none';
+            document.getElementById('showAnswerBtn').style.display = 'flex';
+            document.getElementById('scoreButtons').style.display = 'none';
+        }
+        
+        document.getElementById('prevBtn').disabled = currentIndex === 0;
+        if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
+    }
+
+    function speakDefinition() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const current = currentWords[currentIndex];
+            const utterance = new SpeechSynthesisUtterance(current.desc);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85; 
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function speakWord() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const current = currentWords[currentIndex];
+            const utterance = new SpeechSynthesisUtterance(current.word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8; 
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    const progressEl = document.getElementById('progress');
+
+    function startLongPress(e) {
+        e.preventDefault();
+        pressTimer = setTimeout(() => {
+            speakWord();
+        }, 900);
+    }
+
+    function cancelLongPress() {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    }
+
+    progressEl.addEventListener('mousedown', startLongPress);
+    progressEl.addEventListener('mouseup', cancelLongPress);
+    progressEl.addEventListener('mouseleave', cancelLongPress);
+
+    progressEl.addEventListener('touchstart', startLongPress);
+    progressEl.addEventListener('touchend', cancelLongPress);
+    progressEl.addEventListener('touchcancel', cancelLongPress);
+
+    function showAnswer() {
+        document.getElementById('answer').style.display = 'block';
+        document.getElementById('showAnswerBtn').style.display = 'none';
+        document.getElementById('scoreButtons').style.display = 'grid';
+    }
+
+    function recordScore(type) {
+        userAnswers[currentIndex] = type;
+        if (currentIndex < currentWords.length - 1) {
+            currentIndex++;
+            updateQuiz();
+        } else {
+            showFinalResult();
+        }
+    }
+
+    function showFinalResult() {
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        
+        let totalWrongCount = 0;
+        let halfWrong = 0;
+        let fullWrong = 0;
+        
+        userAnswers.forEach(type => {
+            if (type === 'both_no') { totalWrongCount += 1.0; fullWrong++; } 
+            else if (['eng_ok', 'kor_ok', 'kor_no', 'eng_no'].includes(type)) { totalWrongCount += 0.5; halfWrong++; }
+        });
+        
+        document.getElementById('finalScore').innerText = "총 틀린 개수: " + totalWrongCount + "개";
+        document.getElementById('wrongDetail').innerText = "(둘 다 틀림: " + fullWrong + "개 / 한쪽만 틀림: " + halfWrong + "개)";
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) { currentIndex--; updateQuiz(); }
+    }
+
+    function nextQuestion() {
+        if (currentIndex < currentWords.length - 1) { currentIndex++; updateQuiz(); } 
+        else { showFinalResult(); }
+    }
+
+    function restartQuiz() {
+        initQuiz();
+        document.getElementById('quiz-area').style.display = 'block';
+        document.getElementById('result-area').style.display = 'none';
+        updateQuiz();
+    }
+
+    window.onload = function() { initQuiz(); updateQuiz(); };
+</script>
+</body>
+</html>
